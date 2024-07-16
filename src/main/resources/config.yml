@@ -7,4 +7,7 @@ Enabled: false
 #default 1800 second = 30 minutes
 
 InactivityTimeout: 1800
-
+AccessKeyId: replace
+SecretAccessKey: replace
+Region: us-west-1
+InstanceId: id

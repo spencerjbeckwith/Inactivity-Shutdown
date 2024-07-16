@@ -5,9 +5,13 @@ import java.util.logging.Logger;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.ec2.AmazonEC2;
+import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
+import com.amazonaws.services.ec2.model.StopInstancesRequest;
 
 public final class Inactivityshutdown extends JavaPlugin {
     private Logger log;
@@ -69,6 +73,21 @@ public final class Inactivityshutdown extends JavaPlugin {
             HandlerList.unregisterAll(this);
 
             getServer().shutdown();
+
+            String accessKeyId = getConfig().getString("AccessKeyId");
+            String secretAccessKey = getConfig().getString("SecretAccessKey");
+            String region = getConfig().getString("Region");
+            String instanceId = getConfig().getString("InstanceId");
+
+            BasicAWSCredentials creds = new BasicAWSCredentials(accessKeyId, secretAccessKey);
+            AmazonEC2 ec2 = AmazonEC2ClientBuilder.standard()
+                .withCredentials(new AWSStaticCredentialsProvider(creds))
+                .withRegion(region)
+                .build();
+
+            StopInstancesRequest request = new StopInstancesRequest().withInstanceIds(instanceId);
+            ec2.stopInstances(request);
+            log.info("Requested stop of EC2 instance with ID " + instanceId + ".");
         }
     }
 
