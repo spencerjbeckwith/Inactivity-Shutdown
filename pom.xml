@@ -6,7 +6,7 @@
 
     <groupId>ares06</groupId>
     <artifactId>inactivityshutdown</artifactId>
-    <version>1.0-RELEASE</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
     <name>inactivityshutdown</name>
@@ -57,23 +57,19 @@
             <id>papermc-repo</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
-        <repository>
-            <id>sonatype</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
-        </repository>
     </repositories>
 
     <dependencies>
         <dependency>
             <groupId>com.destroystokyo.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.12.2-R0.1-SNAPSHOT</version>
+            <version>1.16.5-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-ec2</artifactId>
-            <version>1.12.112</version>
+            <version>1.12.761</version>
         </dependency>
     </dependencies>
 </project>

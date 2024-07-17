@@ -4,6 +4,8 @@ package ares06.inactivityshutdown;
 import java.util.logging.Logger;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -68,26 +70,36 @@ public final class Inactivityshutdown extends JavaPlugin {
     public void onTimerExpired() {
         if(noPlayerOnline()) {
             log.info("No players online, shutting down");
-
             //Remove all our Listeners
             HandlerList.unregisterAll(this);
+            Bukkit.getScheduler().runTask(this, new Runnable() {
+                @Override
+                public void run() {
+                    getServer().getWorlds().forEach((world) -> {
+                        world.save();
+                        log.info("World " + world.getName() + " saved.");
+                    });
+                    getServer().savePlayers();
+                    log.info("Players saved.");
 
-            getServer().shutdown();
+                    String accessKeyId = getConfig().getString("AccessKeyId");
+                    String secretAccessKey = getConfig().getString("SecretAccessKey");
+                    String region = getConfig().getString("Region");
+                    String instanceId = getConfig().getString("InstanceId");
+                    
+                    BasicAWSCredentials creds = new BasicAWSCredentials(accessKeyId, secretAccessKey);
+                    AmazonEC2 ec2 = AmazonEC2ClientBuilder.standard()
+                        .withCredentials(new AWSStaticCredentialsProvider(creds))
+                        .withRegion(region)
+                        .build();
 
-            String accessKeyId = getConfig().getString("AccessKeyId");
-            String secretAccessKey = getConfig().getString("SecretAccessKey");
-            String region = getConfig().getString("Region");
-            String instanceId = getConfig().getString("InstanceId");
+                    StopInstancesRequest request = new StopInstancesRequest().withInstanceIds(instanceId);
+                    ec2.stopInstances(request);
+                    log.info("Requested stop of EC2 instance with ID " + instanceId + ".");
 
-            BasicAWSCredentials creds = new BasicAWSCredentials(accessKeyId, secretAccessKey);
-            AmazonEC2 ec2 = AmazonEC2ClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider(creds))
-                .withRegion(region)
-                .build();
-
-            StopInstancesRequest request = new StopInstancesRequest().withInstanceIds(instanceId);
-            ec2.stopInstances(request);
-            log.info("Requested stop of EC2 instance with ID " + instanceId + ".");
+                    getServer().shutdown();
+                };
+            });
         }
     }
 
